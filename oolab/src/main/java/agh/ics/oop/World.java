@@ -18,7 +18,7 @@ public class World {
                 case "b" -> Direction.BACKWARD;
                 case "r" -> Direction.RIGHT;
                 case "l" -> Direction.LEFT;
-                default -> Direction.FORWARD;
+                default -> Direction.NOWHERE;
             };
         }
         return directions;
@@ -41,6 +41,7 @@ public class World {
                 case LEFT:
                     System.out.println("zwierzak skreca w lewo");
                     break;
+                case NOWHERE:
             }
         }
     }
