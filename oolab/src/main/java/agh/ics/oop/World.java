@@ -1,11 +1,17 @@
 package agh.ics.oop;
 
+import javax.sound.midi.SysexMessage;
+
 public class World {
     public static void main(String[] args) {
         System.out.println("system wystartował");
-        Direction[] newArgs;
-        newArgs = changeToDirections(args);
-        run(newArgs);
+        Animal familiar = new Animal();
+        MoveDirection[] moveCommand = OptionsParser.parser(args);
+        for (MoveDirection arg : moveCommand) {
+            System.out.println(familiar.toString());
+            familiar.move(arg);
+            System.out.println(familiar.toString());
+        }
         System.out.println("system zakończył działanie");
     }
 
@@ -24,11 +30,8 @@ public class World {
         return directions;
     }
 
-    public static void run(Direction[] args) {
-//        System.out.println("zwierzak idzie do przodu");
-        for (Direction arg : args) {
-//            if (!Objects.equals(arg, args[args.length - 1])) System.out.print(arg + ",");
-//            else System.out.println(arg);
+    public static void run(MoveDirection[] args) {
+        for (MoveDirection arg : args) {
             switch (arg) {
                 case FORWARD:
                     System.out.println("zwierzak idzie do przodu");
@@ -41,7 +44,6 @@ public class World {
                 case LEFT:
                     System.out.println("zwierzak skreca w lewo");
                     break;
-                case NOWHERE:
             }
         }
         Vector2d position1 = new Vector2d(1,2);
@@ -49,5 +51,12 @@ public class World {
         Vector2d position2 = new Vector2d(-2,1);
         System.out.println(position2);
         System.out.println(position1.add(position2));
+        Animal animal = new Animal();
+        System.out.println(animal.toString());
+        animal.move(MoveDirection.RIGHT);
+        animal.move(MoveDirection.FORWARD);
+        animal.move(MoveDirection.FORWARD);
+        animal.move(MoveDirection.FORWARD);
+        System.out.println(animal.toString());
     }
 }
