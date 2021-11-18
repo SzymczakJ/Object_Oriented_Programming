@@ -4,15 +4,23 @@ import javax.sound.midi.SysexMessage;
 
 public class World {
     public static void main(String[] args) {
-        System.out.println("system wystartował");
-        Animal familiar = new Animal();
-        MoveDirection[] moveCommand = OptionsParser.parser(args);
-        for (MoveDirection arg : moveCommand) {
-            System.out.println(familiar.toString());
-            familiar.move(arg);
-            System.out.println(familiar.toString());
-        }
-        System.out.println("system zakończył działanie");
+        MoveDirection[] directions = new OptionsParser().parse(args);
+        for (MoveDirection direction: directions) System.out.println(direction.toString());
+        IWorldMap map = new RectangularMap(10, 5);
+        Vector2d[] positions = { new Vector2d(2,2), new Vector2d(3,4) };
+        IEngine engine = new SimulationEngine(map, directions, positions);
+        System.out.println(map.toString());
+        engine.run();
+        System.out.println(map.toString());
+//        System.out.println("system wystartował");
+//        Animal familiar = new Animal();
+//        MoveDirection[] moveCommand = OptionsParser.parser(args);
+//        for (MoveDirection arg : moveCommand) {
+//            System.out.println(familiar.toString());
+//            familiar.move(arg);
+//            System.out.println(familiar.toString());
+//        }
+//        System.out.println("system zakończył działanie");
     }
 
     public static Direction[] changeToDirections(String[] args) {

@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class OptionsParser {
 
-    public static MoveDirection[] parser(String[] input) {
+    public static MoveDirection[] parse(String[] input) {
         MoveDirection[] res;
         res = new MoveDirection[input.length];
         int counter = 0;
