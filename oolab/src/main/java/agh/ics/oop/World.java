@@ -12,6 +12,11 @@ public class World {
         System.out.println(map.toString());
         engine.run();
         System.out.println(map.toString());
+        IWorldMap grassField = new GrassField(10);
+        IEngine grassEngine = new SimulationEngine(grassField, directions, positions);
+        System.out.println(grassField.toString());
+        grassEngine.run();
+        System.out.println(grassField.toString());
 //        System.out.println("system wystartował");
 //        Animal familiar = new Animal();
 //        MoveDirection[] moveCommand = OptionsParser.parser(args);

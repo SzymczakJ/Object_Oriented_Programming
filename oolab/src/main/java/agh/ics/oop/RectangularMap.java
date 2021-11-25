@@ -3,13 +3,13 @@ package agh.ics.oop;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RectangularMap implements IWorldMap {
+public class RectangularMap extends AbstractWorldMap implements IWorldMap {
     private final int height;
     private final int width;
     private final Vector2d  upperRightConstraint;
     private final Vector2d lowerLeftConstraint;
     private MapVisualizer mapVisualizer = new MapVisualizer(this);
-    private List<Animal> animals = new ArrayList<>();
+//    private List<Animal> animals = new ArrayList<>();
 
     public RectangularMap(int width, int height) {
         this.height = height - 1;
@@ -18,8 +18,9 @@ public class RectangularMap implements IWorldMap {
         this.lowerLeftConstraint = new Vector2d(0, 0);
     }
 
-    public String toString() {
-        return mapVisualizer.draw(lowerLeftConstraint, upperRightConstraint);
+    @Override
+    public Vector2d[] computeBounds() {
+        return new Vector2d[] {this.lowerLeftConstraint, this.upperRightConstraint};
     }
 
     @Override
@@ -28,15 +29,6 @@ public class RectangularMap implements IWorldMap {
         Vector2d lowerLeftConstraint = new Vector2d(0, 0);
         return position.follows(lowerLeftConstraint) && position.precedes(upperRightConstraint) &&
                 !isOccupied(position);
-    }
-
-    @Override
-    public boolean place(Animal animal) {
-        if (!this.isOccupied(animal.getPosition())) {
-            animals.add(animal);
-            return true;
-        }
-        else return false;
     }
 
     @Override
