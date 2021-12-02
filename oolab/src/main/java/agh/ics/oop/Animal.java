@@ -1,12 +1,14 @@
 package agh.ics.oop;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class Animal {
     private MapDirection orientation = MapDirection.NORTH;
     private Vector2d position;
     private IWorldMap map;
+    private List<IPositionChangeObserver> observers = new ArrayList<IPositionChangeObserver>();
 
     public Animal() {
         position = new Vector2d(2, 2);
@@ -55,6 +57,7 @@ public class Animal {
                 throw new IllegalStateException("Unexpected value: " + direction);
         }
         if (map.canMoveTo(newPosition)) {
+            if (orientation.equals(newOrientation)) positionChanged(this.position, newPosition);
             this.orientation = newOrientation;
             this.position = newPosition;
         }
@@ -64,6 +67,20 @@ public class Animal {
 //                case BACKWARD -> this.position = this.position.substract(this.orientation.toUnitVector().opposite());
 //            }
 //        }
+    }
+
+    public void addObserver(IPositionChangeObserver observer) {
+        observers.add(observer);
+    }
+
+    void removeObserver(IPositionChangeObserver observer) {
+        observers.remove(observer);
+    }
+
+    public void positionChanged(Vector2d oldPosition, Vector2d newPosition) {
+        for (IPositionChangeObserver observer: observers) {
+            observer.positionChanged(oldPosition, newPosition);
+        }
     }
 
     public Vector2d getPosition() {

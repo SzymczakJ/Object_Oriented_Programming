@@ -7,7 +7,7 @@ import java.util.Vector;
 
 import static java.lang.Math.sqrt;
 
-public class GrassField extends AbstractWorldMap implements IWorldMap {
+public class GrassField extends AbstractWorldMap implements IWorldMap, IPositionChangeObserver {
     private final int numberOfTufts;
     private final Vector2d lowerLeftConstraint = new Vector2d(Integer.MIN_VALUE, Integer.MIN_VALUE);
     private final Vector2d upperRightConstraint = new Vector2d(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -19,7 +19,7 @@ public class GrassField extends AbstractWorldMap implements IWorldMap {
         Vector2d upperRightConstraint = new Vector2d(0, 0);
         Vector2d newLowerLeftConstraint;
         Vector2d newUpperRightConstraint;
-        for (Animal animal: animals){
+        for (Animal animal: animalsList){
             newLowerLeftConstraint = animal.getPosition().lowerLeft(lowerLeftConstraint);
             newUpperRightConstraint = animal.getPosition().upperRight(upperRightConstraint);
             if (newLowerLeftConstraint.precedes(lowerLeftConstraint)) lowerLeftConstraint = newLowerLeftConstraint;
@@ -62,9 +62,7 @@ public class GrassField extends AbstractWorldMap implements IWorldMap {
 
     @Override
     public boolean isOccupied(Vector2d position) {
-        for (Animal animal: animals) {
-            if (animal.isAt(position)) return true;
-        }
+        if (super.isOccupied(position)) return true;
         for (Grass tuft: tufts) {
             if (tuft.getPosition().equals(position)) return true;
         }
@@ -80,8 +78,8 @@ public class GrassField extends AbstractWorldMap implements IWorldMap {
 
     @Override
     public Object objectAt(Vector2d position) {
-        for (Animal animal: animals) {
-            if (animal.isAt(position)) return animal;
+        if (super.objectAt(position) != null) {
+            return super.objectAt(position);
         }
         for (Grass tuft: tufts) {
             if (tuft.getPosition().equals(position)) return tuft;
