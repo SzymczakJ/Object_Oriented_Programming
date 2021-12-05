@@ -4,28 +4,22 @@ import javax.sound.midi.SysexMessage;
 
 public class World {
     public static void main(String[] args) {
-        MoveDirection[] directions = new OptionsParser().parse(args);
-        for (MoveDirection direction: directions) System.out.println(direction.toString());
-        IWorldMap map = new RectangularMap(10, 5);
-        Vector2d[] positions = { new Vector2d(2,2), new Vector2d(3,4) };
-        IEngine engine = new SimulationEngine(map, directions, positions);
-        System.out.println(map.toString());
-        engine.run();
-        System.out.println(map.toString());
-        IWorldMap grassField = new GrassField(10);
-        IEngine grassEngine = new SimulationEngine(grassField, directions, positions);
-        System.out.println(grassField.toString());
-        grassEngine.run();
-        System.out.println(grassField.toString());
-//        System.out.println("system wystartował");
-//        Animal familiar = new Animal();
-//        MoveDirection[] moveCommand = OptionsParser.parser(args);
-//        for (MoveDirection arg : moveCommand) {
-//            System.out.println(familiar.toString());
-//            familiar.move(arg);
-//            System.out.println(familiar.toString());
-//        }
-//        System.out.println("system zakończył działanie");
+        try {
+            MoveDirection[] directions = new OptionsParser().parse(args);
+            IWorldMap map = new RectangularMap(10, 5);
+            Vector2d[] positions = {new Vector2d(2, 2), new Vector2d(3, 4)};
+            IEngine engine = new SimulationEngine(map, directions, positions);
+            System.out.println(map.toString());
+            engine.run();
+            System.out.println(map.toString());
+            IWorldMap grassField = new GrassField(10);
+            IEngine grassEngine = new SimulationEngine(grassField, directions, positions);
+            System.out.println(grassField.toString());
+            grassEngine.run();
+            System.out.println(grassField.toString());
+        } catch(IllegalArgumentException e) {
+            System.out.println(e);
+        }
     }
 
     public static Direction[] changeToDirections(String[] args) {

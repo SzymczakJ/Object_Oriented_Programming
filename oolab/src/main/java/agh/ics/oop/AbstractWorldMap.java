@@ -14,14 +14,16 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
     public abstract boolean canMoveTo(Vector2d position);
     public abstract Vector2d[] computeBounds();
 
-    public boolean place(Animal animal) {
+    public boolean place(Animal animal) throws IllegalArgumentException{
         if (this.canMoveTo(animal.getPosition())) {
             animals.put(animal.getPosition(), animal);
             animalsList.add(animal);
             animal.addObserver(this);
             return true;
         }
-        else return false;
+        else {
+            throw new IllegalArgumentException(animal.getPosition().toString() + " is invalid place to place animal");
+        }
     }
 
     public boolean isOccupied(Vector2d position) {

@@ -11,8 +11,6 @@ public class Vector2d {
         this.y = y;
     }
 
-
-
     public String toString() {
         return "(" + x + "," + y + ")";
     }
@@ -68,6 +66,32 @@ public class Vector2d {
 
     public Vector2d opposite() {
         return new Vector2d(-this.x, -this.y);
+    }
+
+    public int compareByX(Vector2d other) {
+        if (this.x == other.x) {
+            if (this.y > other.y) return 1;
+            else return -1;
+        }
+        else if (this.x > other.x) return 1;
+        else return -1;
+    }
+
+    public int compareByY(Vector2d other) {
+        if (this.y == other.y) {
+            if (this.x > other.x) return 1;
+            else return -1;
+        }
+        else if (this.y > other.y) return 1;
+        else return -1;
+    }
+
+    public int getX() {
+        return this.x;
+    }
+
+    public int getY() {
+        return this.y;
     }
 
     @Override

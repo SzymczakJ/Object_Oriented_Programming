@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class Animal {
+public class Animal extends AbstractWorldMapElement{
     private MapDirection orientation = MapDirection.NORTH;
-    private Vector2d position;
     private IWorldMap map;
     private List<IPositionChangeObserver> observers = new ArrayList<IPositionChangeObserver>();
 
@@ -83,7 +82,4 @@ public class Animal {
         }
     }
 
-    public Vector2d getPosition() {
-        return new Vector2d(this.position.x, this.position.y);
-    }
 }

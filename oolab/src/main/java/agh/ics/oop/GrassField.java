@@ -1,36 +1,19 @@
 package agh.ics.oop;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
 
 import static java.lang.Math.sqrt;
 
 public class GrassField extends AbstractWorldMap implements IWorldMap, IPositionChangeObserver {
     private final int numberOfTufts;
-    private final Vector2d lowerLeftConstraint = new Vector2d(Integer.MIN_VALUE, Integer.MIN_VALUE);
-    private final Vector2d upperRightConstraint = new Vector2d(Integer.MAX_VALUE, Integer.MAX_VALUE);
-//    private List<Animal> animals = new ArrayList<>();
+    private Vector2d lowerLeftConstraint = new Vector2d(Integer.MIN_VALUE, Integer.MIN_VALUE);
+    private Vector2d upperRightConstraint = new Vector2d(Integer.MAX_VALUE, Integer.MAX_VALUE);
     private List<Grass> tufts = new ArrayList<>();
+    private final MapBoundary mapBoundary = new MapBoundary();
 
     public Vector2d[] computeBounds() {
-        Vector2d lowerLeftConstraint = new Vector2d((int) ((int) 10 * sqrt(numberOfTufts) + 1), (int) ((int) 10 * sqrt(numberOfTufts) + 1));
-        Vector2d upperRightConstraint = new Vector2d(0, 0);
-        Vector2d newLowerLeftConstraint;
-        Vector2d newUpperRightConstraint;
-        for (Animal animal: animalsList){
-            newLowerLeftConstraint = animal.getPosition().lowerLeft(lowerLeftConstraint);
-            newUpperRightConstraint = animal.getPosition().upperRight(upperRightConstraint);
-            if (newLowerLeftConstraint.precedes(lowerLeftConstraint)) lowerLeftConstraint = newLowerLeftConstraint;
-            if (newUpperRightConstraint.follows(upperRightConstraint)) upperRightConstraint = newUpperRightConstraint;
-        }
-        for (Grass tuft: tufts){
-            newLowerLeftConstraint = tuft.getPosition().lowerLeft(lowerLeftConstraint);
-            newUpperRightConstraint = tuft.getPosition().upperRight(upperRightConstraint);
-            if (newLowerLeftConstraint.precedes(lowerLeftConstraint)) lowerLeftConstraint = newLowerLeftConstraint;
-            if (newUpperRightConstraint.follows(upperRightConstraint)) upperRightConstraint = newUpperRightConstraint;
-        }
+        lowerLeftConstraint = mapBoundary.computeLowerLeft();
+        upperRightConstraint = mapBoundary.computeUpperRightBoundary();
         return new Vector2d[] {lowerLeftConstraint, upperRightConstraint};
     }
 
@@ -50,6 +33,13 @@ public class GrassField extends AbstractWorldMap implements IWorldMap, IPosition
                 i++;
             }
         }
+    }
+
+    @Override
+    public boolean place(Animal animal) {
+        super.place(animal);
+        mapBoundary.place(animal.getPosition());
+        return true;
     }
 
     @Override

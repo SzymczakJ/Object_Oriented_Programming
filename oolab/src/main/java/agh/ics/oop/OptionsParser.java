@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class OptionsParser {
 
-    public static MoveDirection[] parse(String[] input) {
+    public static MoveDirection[] parse(String[] input) throws IllegalArgumentException {
         MoveDirection[] res;
         res = new MoveDirection[input.length];
         int counter = 0;
@@ -31,8 +31,10 @@ public class OptionsParser {
                     counter += 1;
                     break;
                 default:
+                    throw new IllegalArgumentException(s + " is not legal move specification");
             }
         }
         return Arrays.copyOfRange(res, 0, counter);
     }
+
 }
