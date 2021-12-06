@@ -30,6 +30,7 @@ public class GrassField extends AbstractWorldMap implements IWorldMap, IPosition
             if (!isOccupiedByGrass(new Vector2d(xCoordinate, yCoordinate))){
                 Grass grass = new Grass(xCoordinate, yCoordinate);
                 tufts.add(grass);
+                mapBoundary.place(new Vector2d(xCoordinate, yCoordinate));
                 i++;
             }
         }
@@ -39,12 +40,12 @@ public class GrassField extends AbstractWorldMap implements IWorldMap, IPosition
     public boolean place(Animal animal) {
         super.place(animal);
         mapBoundary.place(animal.getPosition());
+        animal.addObserver(mapBoundary);
         return true;
     }
 
     @Override
     public boolean canMoveTo(Vector2d position) {
-        if (!position.follows(lowerLeftConstraint) || !position.precedes(upperRightConstraint)) return false;
         if (!this.isOccupied(position)) return true;
         else if (this.objectAt(position) instanceof Grass) return true;
         else return false;

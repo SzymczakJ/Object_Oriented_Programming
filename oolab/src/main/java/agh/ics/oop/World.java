@@ -1,17 +1,15 @@
 package agh.ics.oop;
 
+import agh.ics.oop.gui.App;
+import javafx.application.Application;
+
 import javax.sound.midi.SysexMessage;
 
 public class World {
     public static void main(String[] args) {
         try {
             MoveDirection[] directions = new OptionsParser().parse(args);
-            IWorldMap map = new RectangularMap(10, 5);
             Vector2d[] positions = {new Vector2d(2, 2), new Vector2d(3, 4)};
-            IEngine engine = new SimulationEngine(map, directions, positions);
-            System.out.println(map.toString());
-            engine.run();
-            System.out.println(map.toString());
             IWorldMap grassField = new GrassField(10);
             IEngine grassEngine = new SimulationEngine(grassField, directions, positions);
             System.out.println(grassField.toString());
@@ -20,6 +18,7 @@ public class World {
         } catch(IllegalArgumentException e) {
             System.out.println(e);
         }
+//        Application.launch(App.class, args);
     }
 
     public static Direction[] changeToDirections(String[] args) {

@@ -71,6 +71,7 @@ public class Vector2d {
     public int compareByX(Vector2d other) {
         if (this.x == other.x) {
             if (this.y > other.y) return 1;
+            else if (this.y == other.y) return 0;
             else return -1;
         }
         else if (this.x > other.x) return 1;
@@ -80,6 +81,7 @@ public class Vector2d {
     public int compareByY(Vector2d other) {
         if (this.y == other.y) {
             if (this.x > other.x) return 1;
+            else if (this.x == other.x) return 0;
             else return -1;
         }
         else if (this.y > other.y) return 1;
