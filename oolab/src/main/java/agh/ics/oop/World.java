@@ -8,17 +8,10 @@ import javax.sound.midi.SysexMessage;
 public class World {
     public static void main(String[] args) {
         try {
-            MoveDirection[] directions = new OptionsParser().parse(args);
-            Vector2d[] positions = {new Vector2d(2, 2), new Vector2d(3, 4)};
-            IWorldMap grassField = new GrassField(10);
-            IEngine grassEngine = new SimulationEngine(grassField, directions, positions);
-            System.out.println(grassField.toString());
-            grassEngine.run();
-            System.out.println(grassField.toString());
+            Application.launch(App.class, args);
         } catch(IllegalArgumentException e) {
             System.out.println(e);
         }
-//        Application.launch(App.class, args);
     }
 
     public static Direction[] changeToDirections(String[] args) {

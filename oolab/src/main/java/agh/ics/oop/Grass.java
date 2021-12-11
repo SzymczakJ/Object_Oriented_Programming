@@ -8,4 +8,5 @@ public class Grass extends AbstractWorldMapElement{
     public String toString() {
         return "*";
     }
+
 }

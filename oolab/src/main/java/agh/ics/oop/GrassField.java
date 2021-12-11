@@ -77,4 +77,18 @@ public class GrassField extends AbstractWorldMap implements IWorldMap, IPosition
         }
         return null;
     }
+
+    @Override
+    public Vector2d[] getAllPositions() {
+        Vector2d[] res2 = super.getAllPositions();
+        Vector2d[] res1 = new Vector2d[tufts.size() + res2.length];
+        for (int i = 0; i < tufts.size(); i++) {
+            res1[i] = tufts.get(i).getPosition();
+        }
+        for (int i = 0; i < res2.length; i++) {
+            res1[tufts.size() + i] = res2[i];
+        }
+        System.out.println(res2[res2.length - 1]);
+        return res1;
+    }
 }
