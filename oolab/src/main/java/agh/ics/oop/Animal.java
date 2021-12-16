@@ -2,12 +2,13 @@ package agh.ics.oop;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 public class Animal extends AbstractWorldMapElement{
     private MapDirection orientation = MapDirection.NORTH;
     private IWorldMap map;
     private List<IPositionChangeObserver> observers = new ArrayList<IPositionChangeObserver>();
+    private Vector2d position;
 
     public Animal() {
         position = new Vector2d(2, 2);
@@ -24,8 +25,34 @@ public class Animal extends AbstractWorldMapElement{
         this.position = initialPosition;
     }
 
+    public Animal(IWorldMap map, Vector2d initialPosition, MapDirection direction) {
+        this.map = map;
+        this.orientation = direction;
+        this.position = initialPosition;
+    }
+
+    public boolean equals(Object other) {
+        if (other instanceof Animal) {
+            Animal animal = (Animal) other;
+            return animal.getPosition().equals(this.position) && this.orientation.equals(animal.orientation);
+        }
+        else return false;
+    }
+
     public String toString() {
         return orientation.toString();
+    }
+
+    @Override
+    public String getImage() {
+        String res = "src/main/resources/";
+        String additionToRes = switch (this.orientation) {
+            case EAST -> "hedgehog_right.png";
+            case WEST -> "hedgehog_left.png";
+            case NORTH -> "hedgehog_front.png";
+            case SOUTH -> "hedgehog_back.png";
+        };
+        return res + additionToRes;
     }
 
     public boolean isAt(Vector2d position) {
@@ -58,14 +85,10 @@ public class Animal extends AbstractWorldMapElement{
         if (map.canMoveTo(newPosition)) {
             if (orientation.equals(newOrientation)) positionChanged(this.position, newPosition);
             this.orientation = newOrientation;
+            System.out.println(orientation.toString() + newOrientation.toString());
             this.position = newPosition;
         }
-//        if (!this.position.follows(new Vector2d(0, 0)) || !this.position.precedes(new Vector2d(4, 4))) {
-//            switch (direction) {
-//                case FORWARD -> this.position = this.position.substract(this.orientation.toUnitVector());
-//                case BACKWARD -> this.position = this.position.substract(this.orientation.toUnitVector().opposite());
-//            }
-//        }
+        this.orientation = newOrientation;
     }
 
     public void addObserver(IPositionChangeObserver observer) {
@@ -82,4 +105,15 @@ public class Animal extends AbstractWorldMapElement{
         }
     }
 
+    public MapDirection getOrientation() {
+        return this.orientation;
+    }
+
+    public Vector2d getPosition() {return new Vector2d(this.position.x, this.position.y);}
+
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(orientation, position);
+    }
 }
