@@ -19,7 +19,6 @@ public class Grass extends AbstractWorldMapElement{
 
     public Vector2d getPosition() {return new Vector2d(this.position.x, this.position.y);}
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

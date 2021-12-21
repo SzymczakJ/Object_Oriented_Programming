@@ -34,7 +34,7 @@ public class App extends Application {
             MoveDirection[] directions = new OptionsParser().parse(commands);
             Vector2d[] positions = {new Vector2d(5, 5), new Vector2d(3, 4)};
             AbstractWorldMap grassField = new GrassField(10);
-            SimulationEngine engine = new SimulationEngine(grassField, directions, positions, this, 1000, animalsOrientation);
+            SimulationEngine engine = new SimulationEngine(grassField, directions, positions, this, 100, animalsOrientation);
             Thread engineThread = new Thread(engine);
             engineThread.start();
         });
@@ -44,7 +44,6 @@ public class App extends Application {
             animalsOrientation = animalsOrientation.next();
             directionButton.setText(animalsOrientation.toString());
         });
-        System.out.println(animalsOrientation.toString());
         HBox hbox = new HBox(gridPane, startButton, textField, directionButton);
         Scene scene = new Scene(hbox, 600, 600);
         primaryStage.setScene(scene);

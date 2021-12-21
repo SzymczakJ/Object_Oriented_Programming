@@ -16,7 +16,6 @@ public class SimulationEngine implements IEngine, Runnable {
     private final MapDirection orientations;
 
     public SimulationEngine(IWorldMap map, MoveDirection[] commands, Vector2d[] positions, App observer, int moveDelay, MapDirection orientations) {
-//    public SimulationEngine(IWorldMap map, MoveDirection[] commands, Vector2d[] positions) {
         this.moveDelay = moveDelay;
         this.orientations = orientations;
         simulationObserver = observer;

@@ -88,7 +88,6 @@ public class GrassField extends AbstractWorldMap implements IWorldMap, IPosition
         for (int i = 0; i < res2.length; i++) {
             res1[tufts.size() + i] = res2[i];
         }
-        System.out.println(res2[res2.length - 1]);
         return res1;
     }
 }

@@ -84,8 +84,6 @@ public class Animal extends AbstractWorldMapElement{
         }
         if (map.canMoveTo(newPosition)) {
             if (orientation.equals(newOrientation)) positionChanged(this.position, newPosition);
-            this.orientation = newOrientation;
-            System.out.println(orientation.toString() + newOrientation.toString());
             this.position = newPosition;
         }
         this.orientation = newOrientation;
@@ -110,7 +108,6 @@ public class Animal extends AbstractWorldMapElement{
     }
 
     public Vector2d getPosition() {return new Vector2d(this.position.x, this.position.y);}
-
 
     @Override
     public int hashCode() {
