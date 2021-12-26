@@ -1,7 +1,6 @@
 package simulation.gui;
 
 import javafx.application.Application;
-import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -9,7 +8,6 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
@@ -22,12 +20,15 @@ import java.util.List;
 public class App extends Application {
     private List<Node> listOfVBoxElements = new ArrayList<>();
     private GridPane gridPane = new GridPane();
-    XYChart.Series numberOfAnimalsSeries = new XYChart.Series();
-    XYChart.Series numberOfGrassesSeries = new XYChart.Series();
-    XYChart.Series averageEnergySeries = new XYChart.Series();
-    XYChart.Series averageChildrenCount = new XYChart.Series();
-    XYChart.Series averageLifeSpan = new XYChart.Series();
-    VBox genotypeDominantVBox = new VBox();
+    private XYChart.Series numberOfAnimalsSeries = new XYChart.Series();
+    private XYChart.Series numberOfGrassesSeries = new XYChart.Series();
+    private XYChart.Series averageEnergySeries = new XYChart.Series();
+    private XYChart.Series averageChildrenCount = new XYChart.Series();
+    private XYChart.Series averageLifeSpan = new XYChart.Series();
+    private VBox genotypeDominantVBox = new VBox();
+    private boolean stopSimulation1 = false;
+    private VBox selectedAnimalVBox = new VBox();
+    private Animal trackedAnimal = null;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -116,8 +117,11 @@ public class App extends Application {
         if (objectAtPosition instanceof Animal) {
             Button animalButton = new Button();
             animalButton.setStyle("-fx-background-color: " + ((Animal) objectAtPosition).getEnergyColor());
-            animalButton.setOnAction(value -> {
-                animalButton.setStyle("-fx-background-color: #00ff00");
+            animalButton.setOnAction(event -> {
+//                selectedAnimalVBox.getChildren().clear();
+//                selectedAnimalVBox.getChildren().add(new Text("Animal:"));
+//                selectedAnimalVBox.getChildren().add(new Text("Genotype: " + ((Animal) objectAtPosition).genotype.toString()));
+//                selectedAnimalVBox.getChildren().add(new Text("Number of children: " + ))
             });
             return animalButton;
         }
@@ -157,7 +161,18 @@ public class App extends Application {
         SimulationEngine engine = new SimulationEngine(rectangularMap, this, 50, 5, 1000);
         Thread engineThread = new Thread(engine);
         engineThread.start();
-        VBox vBox = new VBox(gridPane, genotypeDominantVBox);
+        Button stopSimulation = new Button("Stop simulation");
+        stopSimulation.setOnAction(event -> {
+            if (!stopSimulation1) {
+                    stopSimulation.setText("Start simulation");
+                    stopSimulation1 = true;
+                }
+            else    {
+                    stopSimulation.setText("Stop simulation");
+                    stopSimulation1 = false;
+                }
+        });
+        VBox vBox = new VBox(gridPane, lineChart, genotypeDominantVBox, stopSimulation);
         Scene simulationScene = new Scene(vBox, 1000, 1000);
         Stage simulationStage = new Stage();
         simulationStage.setTitle("Simulation");
@@ -171,5 +186,9 @@ public class App extends Application {
         for (Genotype genotype: genotypes) {
             genotypeDominantVBox.getChildren().add(new Text(genotype.toString()));
         }
+    }
+
+    public boolean getStopSimulation1() {
+        return stopSimulation1;
     }
 }

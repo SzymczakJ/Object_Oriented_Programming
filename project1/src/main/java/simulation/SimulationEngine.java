@@ -21,6 +21,7 @@ public class SimulationEngine implements Runnable{
 
     @Override
     public void run() {
+        int somethingToBotherSimulation = 1;
         Platform.runLater(() -> {
             simulationObserver.renderMap(map);
         });
@@ -30,6 +31,11 @@ public class SimulationEngine implements Runnable{
             e.printStackTrace();
         }
         while (true) {
+            while (simulationObserver.getStopSimulation1()) { try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                System.out.println("zakończono działanie");
+            }}
             map.moveAllAnimals();
             map.deleteDeadAnimals();
             map.allAnimalsGrazeOnGrass();

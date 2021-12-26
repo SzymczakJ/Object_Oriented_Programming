@@ -25,6 +25,7 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
     public final Vector2d higherRightSavannaCorner;
     public final Vector2d lowerLeftJungleCorner;
     public final Vector2d higherRightJungleCorner;
+    protected AnimalTracker currentTracker = null;
     //TODO TOWYJEBAC
     public Vector2d[] computeBounds() {
         return new Vector2d[] {lowerLeftSavannaCorner, higherRightSavannaCorner};
@@ -357,5 +358,28 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
             }
         });
         return dominantGenotypes;
+    }
+
+    public void setCurrentTracker(AnimalTracker animalTracker) {
+        currentTracker = animalTracker;
+    }
+
+    public boolean notifyTracker(Animal animal1, Animal animal2) {
+        boolean trackedAnimalPresent = false;
+        if (animal1.getAnimalTracker() != null && animal1.getAnimalTracker().getAnimal() == animal1) trackedAnimalPresent = true;
+        else if (animal2.getAnimalTracker() != null && animal2.getAnimalTracker().getAnimal() == animal2) trackedAnimalPresent = true;
+        if (trackedAnimalPresent) {
+            currentTracker.increaseChildrenAndDescendantCount();
+            return true;
+        }
+
+        if (animal1.getAnimalTracker() == currentTracker) {
+            currentTracker.increaseDescendantCount();
+            return true;
+        }
+        else if (animal2.getAnimalTracker() == currentTracker) {
+            currentTracker.increaseDescendantCount();
+            return true;
+        } else return false;
     }
 }

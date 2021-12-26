@@ -1,5 +1,6 @@
 package simulation;
 
+import java.util.HashMap;
 import java.util.Random;
 
 public class Animal {
@@ -13,6 +14,7 @@ public class Animal {
     private int childrenCounter = 0;
     private int birthEra;
     private int deathEra = -1;
+    private AnimalTracker animalTracker = null;
 
     public Animal(AbstractWorldMap map, Vector2d position, int energy, int birthEra) {
         this.map = map;
@@ -157,6 +159,8 @@ public class Animal {
             map.place(newAnimal);
             this.increaseChildrenCounter();
             otherAnimal.increaseChildrenCounter();
+            if (map.notifyTracker(this, otherAnimal)) newAnimal.setAnimalTracker(map.currentTracker);
+            map.grassTufts = new HashMap<>();
             return true;
         }
         else return false;
@@ -187,5 +191,13 @@ public class Animal {
 
     public void setDeathEra(int era) {
         deathEra = era;
+    }
+
+    public void setAnimalTracker(AnimalTracker animalTracker) {
+        this.animalTracker = animalTracker;
+    }
+
+    public AnimalTracker getAnimalTracker() {
+        return animalTracker;
     }
 }
