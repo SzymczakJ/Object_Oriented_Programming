@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="simulation.AnimalTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2021-12-21T20:48:24" hostname="pc" time="0.011">
+<testsuite name="simulation.AnimalTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2021-12-23T09:06:00" hostname="pc" time="0.012">
   <properties/>
-  <testcase name="animalMovementTest()" classname="simulation.AnimalTest" time="0.011"/>
+  <testcase name="animalMovementTest()" classname="simulation.AnimalTest" time="0.012"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

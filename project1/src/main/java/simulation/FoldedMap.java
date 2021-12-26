@@ -11,8 +11,8 @@ public class FoldedMap extends AbstractWorldMap{
 //    private final Vector2d higherRightJungleCorner;
 
 
-    public FoldedMap(int height, int width, float jungleRatio, int energyGivenByGrass) {
-        super(height, width, jungleRatio, energyGivenByGrass);
+    public FoldedMap(int height, int width, double jungleRatio, int energyGivenByGrass, int startingEnergy, int moveEnergy) {
+        super(height, width, jungleRatio, energyGivenByGrass, startingEnergy, moveEnergy);
 //        lowerLeftSavannaCorner = new Vector2d(0, 0);
 //        higherRightSavannaCorner = new Vector2d(width, height);
 //        lowerLeftJungleCorner = new Vector2d((int) (width * (1 - jungleRatio) / 2), (int) (height * (1 - jungleRatio) / 2));

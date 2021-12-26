@@ -1,25 +1,38 @@
 package simulation;
 
 import java.util.*;
+import java.util.List;
 
 
 public abstract class AbstractWorldMap implements IPositionChangeObserver {
-//    protected Map<Vector2d, Map<Animal, Animal>> animals = new HashMap<>();
+    protected List<Animal> animalList = new ArrayList<>();
+    protected List<Animal> deadAnimalList = new ArrayList<>();
     protected Map<Vector2d, List<Animal>> animals = new HashMap<>();
     protected Map<Vector2d, Grass> grassTufts = new HashMap<>();
+    protected Map<Genotype, Integer> genotypes = new HashMap<>();
+    protected int mapEra = 0;
+    protected Random random = new Random();
     public static int maxEnergy = 100;
+    protected int startingEnergy;
     protected int energyGivenByGrass;
+    protected int moveEnergy;
     protected int mapHeight;
     protected int mapWidth;
     protected double jungleRatio;
-    protected Vector2d lowerLeftSavannaCorner;
-    protected Vector2d higherRightSavannaCorner;
-    protected Vector2d lowerLeftJungleCorner;
-    protected Vector2d higherRightJungleCorner;
+    protected int numberOfAnimals = 0;
+    protected int numberOfGrasses = 0;
+    public final Vector2d lowerLeftSavannaCorner;
+    public final Vector2d higherRightSavannaCorner;
+    public final Vector2d lowerLeftJungleCorner;
+    public final Vector2d higherRightJungleCorner;
+    //TODO TOWYJEBAC
+    public Vector2d[] computeBounds() {
+        return new Vector2d[] {lowerLeftSavannaCorner, higherRightSavannaCorner};
+    }
 
     public abstract Vector2d stepsOutOfBounds(Vector2d oldPosition, Vector2d newPosition);
 
-    public AbstractWorldMap(int height, int width, double jungleRatio, int energyGivenByGrass) {
+    public AbstractWorldMap(int height, int width, double jungleRatio, int energyGivenByGrass, int startingEnergy, int moveEnergy) {
         mapHeight = height;
         mapWidth = width;
         this.jungleRatio = jungleRatio;
@@ -28,6 +41,65 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
         lowerLeftJungleCorner = new Vector2d((int) (width * (1 - jungleRatio) / 2), (int) (height * (1 - jungleRatio) / 2));
         higherRightJungleCorner = new Vector2d((int) (width * (1 + jungleRatio) / 2), (int) (height * (1 + jungleRatio) / 2));
         this.energyGivenByGrass = energyGivenByGrass;
+        this.startingEnergy = startingEnergy;
+        this.moveEnergy = moveEnergy;
+    }
+
+    public void initializeMapWithAnimals(int ammountOfAnimals, int startingEnergy) {
+        int i = 0;
+        while (i < ammountOfAnimals) {
+            Vector2d position = new Vector2d(random.nextInt(mapWidth + 1), random.nextInt(mapHeight + 1));
+            if (!isOccupied(position)) {
+                Animal animal = new Animal(this, position, startingEnergy, this.getMapEra());
+                place(animal);
+                i++;
+            }
+        }
+    }
+
+    public void moveAllAnimals() {
+        mapEra += 1;
+        for (Animal animal: animalList) {
+            animal.moveRandomly();
+            animal.reduceEnergy(moveEnergy);
+        }
+    }
+
+    public void allAnimalsGrazeOnGrass() {
+        animals.forEach((position, animalListAtPosition) -> {
+            if (grassTufts.get(position) != null && !animalListAtPosition.isEmpty()) grazeOnGrass(position);
+        });
+    }
+
+    public void deleteDeadAnimals() {
+        List<Animal> animalsToDelete = new ArrayList<>();
+        List<Vector2d> positionsToDelete = new ArrayList<>();
+        animals.forEach((position, animalListAtPosition) -> {
+            for (Animal animal: animalListAtPosition) {
+                if (animal.getEnergy() <= 0) {
+                    animalsToDelete.add(animal);
+                    animalList.remove(animal);
+                    numberOfAnimals -= 1;
+                    deadAnimalList.add(animal);
+                    removeGenetypeFromGenotypes(animal.genotype);
+                    animal.setDeathEra(this.getMapEra());
+                    if (animalListAtPosition.isEmpty()) positionsToDelete.add(position);
+                }
+            }
+            for (Animal animal: animalsToDelete) {
+                animalListAtPosition.remove(animal);
+            }
+            animalsToDelete.clear();
+        });
+        for (Vector2d positions: positionsToDelete) {
+            animals.remove(positions);
+        }
+    }
+
+    public void allAnimalsMakeLove() {
+        animals.forEach((position, animalList) -> {
+            if (animalList.size() > 1) makeLove(position);
+        });
     }
 
     public boolean isInBounds(Vector2d newPosition) {
@@ -37,8 +109,55 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
     public void place(Animal animal) throws IllegalArgumentException {
         if (this.isInBounds(animal.getPosition())) {
             putAnimalInPositionList(animal);
+            animalList.add(animal);
+            numberOfAnimals += 1;
+            putGenotypeIntoGenotypes(animal.genotype);
         }
         else throw new IllegalArgumentException();
+    }
+
+    public void putGenotypeIntoGenotypes(Genotype genotype) {
+        if (genotypes.get(genotype) == null) {
+            genotypes.put(genotype, 1);
+        }
+        else {
+            genotypes.put(genotype, genotypes.get(genotype) + 1);
+        }
+    }
+
+    public void removeGenetypeFromGenotypes(Genotype genotype) {
+        if (genotypes.get(genotype).intValue() == 1) {
+            genotypes.remove(genotype);
+        }
+        else {
+            genotypes.put(genotype, genotypes.get(genotype) - 1);
+        }
+    }
+
+    public Object getStrongestAnimalAtPosition(Vector2d position) {
+        if (animals.get(position) != null) {
+            List<Animal> animalListAtPosition = animals.get(position);
+            if (animalListAtPosition.size() > 0) {
+                int highestEnergy = 0;
+                Animal strongestAnimal = animalListAtPosition.get(0);
+                for (Animal animal: animalListAtPosition) {
+                    if (animal.getEnergy() > highestEnergy) {
+                        strongestAnimal = animal;
+                        highestEnergy = animal.getEnergy();
+                    }
+                }
+                return strongestAnimal;
+            }
+            else return null;
+        }
+        else return null;
+    }
+
+    public Object objectAt(Vector2d position) {
+        if (getStrongestAnimalAtPosition(position) == null) {
+            return grassTufts.get(position);
+        }
+        else return getStrongestAnimalAtPosition(position);
     }
 
     public void putAnimalInPositionList(Animal animal) {
@@ -56,6 +175,7 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
     public void positionChanged(Vector2d oldPosition, Animal animal) {
         List<Animal> animalsAtPosition = animals.get(oldPosition);
         animalsAtPosition.remove(animal);
+        if (animalsAtPosition.isEmpty()) animals.remove(oldPosition);
         putAnimalInPositionList(animal);
     }
 
@@ -74,6 +194,7 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
         if (!isOccupied(position)) {
             Grass grass = new Grass(position);
             grassTufts.put(grass.getPosition(), grass);
+            numberOfGrasses += 1;
             return true;
         }
         else return false;
@@ -84,12 +205,12 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
         int i = 0;
         Random random = new Random();
 
-        int x = random.nextInt((int) (mapWidth * jungleRatio)) + lowerLeftJungleCorner.x;
-        int y = random.nextInt((int) (mapHeight * jungleRatio)) + lowerLeftJungleCorner.y;
+        int x = random.nextInt((int) (mapWidth * jungleRatio + 2)) + lowerLeftJungleCorner.x;
+        int y = random.nextInt((int) (mapHeight * jungleRatio + 2)) + lowerLeftJungleCorner.y;
         Vector2d positionOfGrass = new Vector2d(x, y);
         while(i < toManyTimes && !createAndPlaceGrass(positionOfGrass)) {
-            x = random.nextInt((int) (mapWidth * jungleRatio)) + lowerLeftJungleCorner.x;
-            y = random.nextInt((int) (mapHeight * jungleRatio)) + lowerLeftJungleCorner.y;
+            x = random.nextInt((int) (mapWidth * jungleRatio + 2)) + lowerLeftJungleCorner.x;
+            y = random.nextInt((int) (mapHeight * jungleRatio + 2)) + lowerLeftJungleCorner.y;
             positionOfGrass = new Vector2d(x, y);
             i++;
         }
@@ -172,5 +293,69 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
             animal.increaseEnergy(energyBoost);
         }
         grassTufts.remove(position);
+    }
+
+    public void makeLove(Vector2d position) {
+        List<Animal> strongestAnimals = getStrongestAnimalsAtPosition(position);
+        if (strongestAnimals.size() == 1) {
+            strongestAnimals.add(getSecondStrongestAnimalAtPosition(position, strongestAnimals.get(0).getEnergy()));
+        }
+        Animal animal1 = strongestAnimals.get(0);
+        Animal animal2 = strongestAnimals.get(1);
+        animal1.fertilization(animal2, (int) (startingEnergy / 2));
+    }
+
+    public int getNumberOfAnimals() {
+        return numberOfAnimals;
+    }
+
+    public int getMapEra() {
+        return mapEra;
+    }
+
+    public int getNumberOfGrasses() {
+        return numberOfGrasses;
+    }
+
+    public int getAverageEnergy() {
+        if (animalList.isEmpty()) return 0;
+        int sum = 0;
+        for (Animal animal: animalList) {
+            sum += animal.getEnergy();
+        }
+        return sum / animalList.size();
+    }
+
+    public int getAverageChildrenCount() {
+        if (animalList.isEmpty()) return 0;
+        int sum = 0;
+        for (Animal animal: animalList) {
+            sum += animal.getChildrenCounter();
+        }
+        return sum / animalList.size();
+    }
+
+    public int getAverageLifeSpan() {
+        if (deadAnimalList.isEmpty()) return 0;
+        int sum = 0;
+        for (Animal animal: deadAnimalList) {
+            sum += (animal.getDeathEra() - animal.getBirthEra());
+        }
+        return sum / deadAnimalList.size();
+    }
+
+    public List<Genotype> getDominantGenotypes() {
+        int maxAmmount = 0;
+        for (Integer ammount: genotypes.values()) {
+            if (maxAmmount < ammount) maxAmmount = ammount.intValue();
+        }
+        int finalMaxAmmount = maxAmmount;
+        List<Genotype> dominantGenotypes = new ArrayList<>();
+        genotypes.forEach((genotype, ammount) -> {
+            if (ammount.intValue() == finalMaxAmmount) {
+                dominantGenotypes.add(genotype);
+            }
+        });
+        return dominantGenotypes;
     }
 }

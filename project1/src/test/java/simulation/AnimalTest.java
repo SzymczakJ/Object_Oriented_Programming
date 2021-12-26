@@ -8,7 +8,7 @@ class AnimalTest {
 
     @Test
     public void animalMovementTest() {
-        RectangularMap rectangularMap = new RectangularMap(30, 30, (float) 0.34);
+        RectangularMap rectangularMap = new RectangularMap(30, 30, (float) 0.34, 100, 20);
         Vector2d startingPosition = new Vector2d(2, 3);
         Animal animal1 = new Animal(rectangularMap, startingPosition, 100, MapDirection.NORTH);
         rectangularMap.place(animal1);
@@ -21,7 +21,7 @@ class AnimalTest {
         animal1.move(MoveDirection.MOVEFORWARD);
         assertEquals(animal1.getPosition(), new Vector2d(0, 4));
 
-        FoldedMap foldedMap = new FoldedMap(30, 30, (float) 0.34);
+        FoldedMap foldedMap = new FoldedMap(30, 30, 0.34, 100, 20);
         Animal animal2 = new Animal(foldedMap, startingPosition, 100, MapDirection.NORTH);
         foldedMap.place(animal2);
         animal2.move(MoveDirection.MOVEFORWARD);
