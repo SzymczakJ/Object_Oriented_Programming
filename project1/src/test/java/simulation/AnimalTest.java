@@ -1,6 +1,8 @@
 package simulation;
 
 import org.junit.jupiter.api.Test;
+import simulation.maps.FoldedMap;
+import simulation.maps.RectangularMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

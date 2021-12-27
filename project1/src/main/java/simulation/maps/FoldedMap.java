@@ -1,9 +1,9 @@
-package simulation;
+package simulation.maps;
 
-import java.util.HashMap;
-import java.util.Map;
+import simulation.Vector2d;
+import simulation.maps.AbstractWorldMap;
 
-public class FoldedMap extends AbstractWorldMap{
+public class FoldedMap extends AbstractWorldMap {
 //    private Map<Vector2d, Map<Animal, Animal>> animals = new HashMap<>();
 //    private final Vector2d lowerLeftSavannaCorner;
 //    private final Vector2d higherRightSavannaCorner;

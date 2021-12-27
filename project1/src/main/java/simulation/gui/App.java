@@ -13,22 +13,25 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import simulation.*;
+import simulation.maps.AbstractWorldMap;
+import simulation.maps.RectangularMap;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class App extends Application {
     private List<Node> listOfVBoxElements = new ArrayList<>();
-    private GridPane gridPane = new GridPane();
-    private XYChart.Series numberOfAnimalsSeries = new XYChart.Series();
-    private XYChart.Series numberOfGrassesSeries = new XYChart.Series();
-    private XYChart.Series averageEnergySeries = new XYChart.Series();
-    private XYChart.Series averageChildrenCount = new XYChart.Series();
-    private XYChart.Series averageLifeSpan = new XYChart.Series();
+    private GridPane[] gridPane = {new GridPane(), new GridPane()};
+    private XYChart.Series[] numberOfAnimalsSeries = {new XYChart.Series(), new XYChart.Series()};
+    private XYChart.Series[] numberOfGrassesSeries = {new XYChart.Series(), new XYChart.Series()};
+    private XYChart.Series[] averageEnergySeries = {new XYChart.Series(), new XYChart.Series()};
+    private XYChart.Series[] averageChildrenCount = {new XYChart.Series(), new XYChart.Series()};
+    private XYChart.Series[] averageLifeSpan = {new XYChart.Series(), new XYChart.Series()};
     private VBox genotypeDominantVBox = new VBox();
-    private boolean stopSimulation1 = false;
+    private boolean stopSimulation = false;
     private VBox selectedAnimalVBox = new VBox();
-    private Animal trackedAnimal = null;
+    private List<double[]> statistics = new ArrayList<>();
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -94,7 +97,9 @@ public class App extends Application {
         averageEnergySeries.getData().add(new XYChart.Data(map.getMapEra(), map.getAverageEnergy()));
         averageChildrenCount.getData().add(new XYChart.Data(map.getMapEra(), map.getAverageChildrenCount()));
         averageLifeSpan.getData().add(new XYChart.Data(map.getMapEra(), map.getAverageLifeSpan()));
+        writeToStatistics(map);
         updateDominants(map.getDominantGenotypes());
+        updateAnimalTrackerVBox(map);
         gridPane.setGridLinesVisible(false);
         gridPane.getColumnConstraints().clear();
         gridPane.getRowConstraints().clear();
@@ -118,10 +123,7 @@ public class App extends Application {
             Button animalButton = new Button();
             animalButton.setStyle("-fx-background-color: " + ((Animal) objectAtPosition).getEnergyColor());
             animalButton.setOnAction(event -> {
-//                selectedAnimalVBox.getChildren().clear();
-//                selectedAnimalVBox.getChildren().add(new Text("Animal:"));
-//                selectedAnimalVBox.getChildren().add(new Text("Genotype: " + ((Animal) objectAtPosition).genotype.toString()));
-//                selectedAnimalVBox.getChildren().add(new Text("Number of children: " + ))
+                map.setCurrentTracker(new AnimalTracker((Animal) objectAtPosition));
             });
             return animalButton;
         }
@@ -157,22 +159,30 @@ public class App extends Application {
         lineChart.getData().add(averageChildrenCount);
         averageLifeSpan.setName("Average children counter");
         lineChart.getData().add(averageLifeSpan);
-        RectangularMap rectangularMap = new RectangularMap(30, 30, (float) 0.34, 500, 100, 5);
-        SimulationEngine engine = new SimulationEngine(rectangularMap, this, 50, 5, 1000);
-        Thread engineThread = new Thread(engine);
+        RectangularMap rectangularMap = new RectangularMap(30, 30, (float) 0.34, 50, 50, 5);
+        ISimulationEngine engine = new SimulationEngine(rectangularMap, this, 50, 1, 500);
+        Thread engineThread = new Thread((Runnable) engine);
         engineThread.start();
         Button stopSimulation = new Button("Stop simulation");
         stopSimulation.setOnAction(event -> {
-            if (!stopSimulation1) {
+            if (!this.stopSimulation) {
                     stopSimulation.setText("Start simulation");
-                    stopSimulation1 = true;
+                    this.stopSimulation = true;
                 }
             else    {
                     stopSimulation.setText("Stop simulation");
-                    stopSimulation1 = false;
+                    this.stopSimulation = false;
                 }
         });
-        VBox vBox = new VBox(gridPane, lineChart, genotypeDominantVBox, stopSimulation);
+        Button writeToCSV = new Button("Write to CSV");
+        writeToCSV.setOnAction(event -> {
+            try {
+                writeToCSVFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        VBox vBox = new VBox(gridPane, selectedAnimalVBox, stopSimulation, writeToCSV);
         Scene simulationScene = new Scene(vBox, 1000, 1000);
         Stage simulationStage = new Stage();
         simulationStage.setTitle("Simulation");
@@ -189,6 +199,58 @@ public class App extends Application {
     }
 
     public boolean getStopSimulation1() {
-        return stopSimulation1;
+        return stopSimulation;
+    }
+
+    public void updateAnimalTrackerVBox(AbstractWorldMap map) {
+        if (map.getAnimalTracker() == null) return;
+
+        AnimalTracker animalTracker = map.getAnimalTracker();
+        selectedAnimalVBox.getChildren().clear();
+        selectedAnimalVBox.getChildren().add(new Text("Animal"));
+        selectedAnimalVBox.getChildren().add(new Text("Genotype: " + animalTracker.getAnimal().genotype.toString()));
+        selectedAnimalVBox.getChildren().add(new Text("Children: " + String.valueOf(animalTracker.getTrackedChildrenNumber())));
+        selectedAnimalVBox.getChildren().add(new Text("Descendants: " + String.valueOf(animalTracker.getTrackedDescendantsNumber())));
+        if (animalTracker.getDeathEra() != -1) {
+            selectedAnimalVBox.getChildren().add(new Text("Death era: " + String.valueOf(animalTracker.getDeathEra())));
+        }
+        if (animalTracker.getDeathEra() == -1) {
+            System.out.println("dupa");
+        }
+    }
+
+    public void writeToStatistics(AbstractWorldMap map) {
+        double[] eraStatistics = new double[5];
+        eraStatistics[0] = map.getNumberOfAnimals();
+        eraStatistics[1] = map.getNumberOfGrasses();
+        eraStatistics[2] = map.getAverageEnergy();
+        eraStatistics[3] = map.getAverageChildrenCount();
+        eraStatistics[4] = map.getAverageLifeSpan();
+        statistics.add(eraStatistics);
+    }
+
+    public void writeToCSVFile() throws IOException {
+        FileWriter csvFile = new FileWriter("statistics.csv");
+        BufferedWriter out = new BufferedWriter(csvFile);
+        String header = "Number of animals, Number of grasses, Average energy, Average children count, Average life span\n";
+        out.write(header);
+
+        double[] dataSums = {0, 0, 0, 0, 0};
+        for (double[] data: statistics) {
+            out.write(String.valueOf(data[0]) + ", " + String.valueOf(data[1]) + ", " + String.valueOf(data[2]) + ", " +
+                    String.valueOf(data[3]) + ", " + String.valueOf(data[4]) + "\n");
+            dataSums[0] += data[0];
+            dataSums[1] += data[1];
+            dataSums[2] += data[2];
+            dataSums[3] += data[3];
+            dataSums[4] += data[4];
+        }
+        out.write(String.valueOf( dataSums[0] / statistics.size()) + ", " +
+                String.valueOf( dataSums[1] / statistics.size()) + ", "
+                + String.valueOf( dataSums[2] / statistics.size()) + ", " +
+                String.valueOf( dataSums[3] / statistics.size())
+                + ", " + String.valueOf( dataSums[4] / statistics.size()));
+        out.close();
+        System.out.println(dataSums[0] / statistics.size());
     }
 }

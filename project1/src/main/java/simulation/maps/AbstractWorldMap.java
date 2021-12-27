@@ -1,4 +1,6 @@
-package simulation;
+package simulation.maps;
+
+import simulation.*;
 
 import java.util.*;
 import java.util.List;
@@ -84,6 +86,7 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
                     deadAnimalList.add(animal);
                     removeGenetypeFromGenotypes(animal.genotype);
                     animal.setDeathEra(this.getMapEra());
+                    notifyTrackerOfDeath(animal);
                     if (animalListAtPosition.isEmpty()) positionsToDelete.add(position);
                 }
             }
@@ -318,31 +321,31 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
         return numberOfGrasses;
     }
 
-    public int getAverageEnergy() {
+    public double getAverageEnergy() {
         if (animalList.isEmpty()) return 0;
         int sum = 0;
         for (Animal animal: animalList) {
             sum += animal.getEnergy();
         }
-        return sum / animalList.size();
+        return (double) sum / (double) animalList.size();
     }
 
-    public int getAverageChildrenCount() {
+    public double getAverageChildrenCount() {
         if (animalList.isEmpty()) return 0;
         int sum = 0;
         for (Animal animal: animalList) {
             sum += animal.getChildrenCounter();
         }
-        return sum / animalList.size();
+        return (double) sum / (double) animalList.size();
     }
 
-    public int getAverageLifeSpan() {
+    public double getAverageLifeSpan() {
         if (deadAnimalList.isEmpty()) return 0;
         int sum = 0;
         for (Animal animal: deadAnimalList) {
             sum += (animal.getDeathEra() - animal.getBirthEra());
         }
-        return sum / deadAnimalList.size();
+        return (double) sum / (double) deadAnimalList.size();
     }
 
     public List<Genotype> getDominantGenotypes() {
@@ -364,7 +367,11 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
         currentTracker = animalTracker;
     }
 
-    public boolean notifyTracker(Animal animal1, Animal animal2) {
+    public AnimalTracker getAnimalTracker() {
+        return currentTracker;
+    }
+
+    public boolean notifyTrackerOfBirth(Animal animal1, Animal animal2) {
         boolean trackedAnimalPresent = false;
         if (animal1.getAnimalTracker() != null && animal1.getAnimalTracker().getAnimal() == animal1) trackedAnimalPresent = true;
         else if (animal2.getAnimalTracker() != null && animal2.getAnimalTracker().getAnimal() == animal2) trackedAnimalPresent = true;
@@ -373,13 +380,38 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
             return true;
         }
 
-        if (animal1.getAnimalTracker() == currentTracker) {
+        if (currentTracker != null && animal1.getAnimalTracker() == currentTracker) {
             currentTracker.increaseDescendantCount();
             return true;
         }
-        else if (animal2.getAnimalTracker() == currentTracker) {
+        else if (currentTracker != null && animal2.getAnimalTracker() == currentTracker) {
             currentTracker.increaseDescendantCount();
             return true;
         } else return false;
+    }
+
+    public void notifyTrackerOfDeath(Animal animal) {
+        if (animal.getAnimalTracker() != null) {
+            currentTracker.setDeathEra(animal);
+        }
+    }
+
+    public int getStartingEnergy() {
+        return startingEnergy;
+    }
+
+    public void magicEvolutionHelper() {
+        List<Animal> newAnimalList = new ArrayList<>();
+        for (Animal animal: animalList) {
+            Vector2d position = new Vector2d(random.nextInt(mapWidth), random.nextInt(mapHeight));
+            while (!isOccupied(position)) {
+                position = new Vector2d(random.nextInt(mapWidth), random.nextInt(mapHeight));
+            }
+            Animal newAnimal = new Animal(this, position, startingEnergy, mapEra, animal.genotype);
+            newAnimalList.add(newAnimal);
+        }
+        for (Animal animal: newAnimalList) {
+            place(animal);
+        }
     }
 }

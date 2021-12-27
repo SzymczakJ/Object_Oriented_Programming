@@ -1,21 +1,40 @@
 package simulation;
 
 public class AnimalTracker {
-    private int trackedChildren = 0;
-    private int trackedDescendants = 0;
+    private int trackedChildrenNumber = 0;
+    private int trackedDescendantsNumber = 0;
     private int eraOfDeath = -1;
-    private Animal animal = null;
+    private final Animal animal;
+
+    public AnimalTracker(Animal animal) {
+        this.animal = animal;
+        animal.setAnimalTracker(this);
+    }
 
     public void increaseDescendantCount() {
-        trackedDescendants += 1;
+        trackedDescendantsNumber += 1;
     }
 
     public void increaseChildrenAndDescendantCount() {
-        trackedChildren += 1;
-        trackedDescendants += 1;
+        trackedChildrenNumber += 1;
+        trackedDescendantsNumber += 1;
     }
 
     public Animal getAnimal() {
         return animal;
     }
+
+    public int getTrackedChildrenNumber() {
+        return trackedChildrenNumber;
+    }
+
+    public int getTrackedDescendantsNumber() {
+        return trackedDescendantsNumber;
+    }
+
+    public void setDeathEra(Animal animal) {
+        if (this.animal == animal) eraOfDeath = animal.getDeathEra();
+    }
+
+    public int getDeathEra() {return eraOfDeath;}
 }

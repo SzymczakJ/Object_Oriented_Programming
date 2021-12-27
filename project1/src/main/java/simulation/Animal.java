@@ -1,6 +1,7 @@
 package simulation;
 
-import java.util.HashMap;
+import simulation.maps.AbstractWorldMap;
+
 import java.util.Random;
 
 public class Animal {
@@ -24,6 +25,16 @@ public class Animal {
         this.orientation = MapDirection.createMapDirectionFromNumber(random.nextInt(8));
         genotype = new Genotype();
         this.birthEra = birthEra;
+    }
+
+    public Animal(AbstractWorldMap map, Vector2d position, int energy, int birthEra, Genotype genotype) {
+        this.map = map;
+        this.position = position;
+        this.energy = energy;
+        observer = map;
+        this.orientation = MapDirection.createMapDirectionFromNumber(random.nextInt(8));
+        this.birthEra = birthEra;
+        this.genotype = genotype;
     }
 
     public Animal(AbstractWorldMap map, Vector2d position, int energy, MapDirection orientation, int birthEra) {
@@ -159,15 +170,14 @@ public class Animal {
             map.place(newAnimal);
             this.increaseChildrenCounter();
             otherAnimal.increaseChildrenCounter();
-            if (map.notifyTracker(this, otherAnimal)) newAnimal.setAnimalTracker(map.currentTracker);
-            map.grassTufts = new HashMap<>();
+            if (map.notifyTrackerOfBirth(this, otherAnimal)) newAnimal.setAnimalTracker(map.getAnimalTracker());
             return true;
         }
         else return false;
     }
 
     public String getEnergyColor() {
-        if (energy > map.startingEnergy) {
+        if (energy > map.getStartingEnergy()) {
             return "B22222";
         }
         else return "FF1493";
