@@ -8,26 +8,29 @@ public class SimulationEngine implements Runnable, ISimulationEngine{
     private final AbstractWorldMap map;
     private final App simulationObserver;
     private final int moveDelay;
+    private final int simulationId;
+    private boolean exit = false;
 
-    public SimulationEngine(AbstractWorldMap map, App simulationObserver, int startingEnergy, int ammountOfAnimals, int moveDelay) {
+    public SimulationEngine(AbstractWorldMap map, App simulationObserver, int startingEnergy, int ammountOfAnimals, int moveDelay, int simulationId) {
         this.map = map;
         this.simulationObserver = simulationObserver;
         this.moveDelay = moveDelay;
+        this.simulationId = simulationId;
         map.initializeMapWithAnimals(ammountOfAnimals, startingEnergy);
     }
 
     @Override
     public void run() {
         Platform.runLater(() -> {
-            simulationObserver.renderMap(map);
+            simulationObserver.renderGui(map, simulationId);
         });
         try {
             Thread.sleep(moveDelay);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        while (true) {
-            while (simulationObserver.getStopSimulation1()) { try {
+        while (!exit) {
+            while (simulationObserver.getStopSimulation(simulationId)) { try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
                 System.out.println("zakończono działanie");
@@ -39,7 +42,7 @@ public class SimulationEngine implements Runnable, ISimulationEngine{
             map.growGrassOnJungle();
             map.growGrassOnSavanna();
             Platform.runLater(() -> {
-                simulationObserver.renderMap((AbstractWorldMap) map);
+                simulationObserver.renderGui(map, simulationId);
             });
             try {
                 Thread.sleep(moveDelay);
@@ -47,5 +50,9 @@ public class SimulationEngine implements Runnable, ISimulationEngine{
                 System.out.println("zakończono działanie");
             }
         }
+    }
+
+    public void stop() {
+        exit = true;
     }
 }

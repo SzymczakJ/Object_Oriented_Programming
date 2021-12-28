@@ -1,11 +1,10 @@
 package simulation.maps;
 
 import simulation.Vector2d;
-import simulation.maps.AbstractWorldMap;
 
-public class RectangularMap extends AbstractWorldMap {
+public class BoundedMap extends AbstractWorldMap {
 
-    public RectangularMap(int height, int width, float jungleRatio, int energyGivenByGrass, int startingEnergy, int moveEnergy) {
+    public BoundedMap(int height, int width, double jungleRatio, int energyGivenByGrass, int startingEnergy, int moveEnergy) {
         super(height, width, jungleRatio, energyGivenByGrass, startingEnergy, moveEnergy);
     }
 

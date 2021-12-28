@@ -23,30 +23,14 @@ public class Vector2d {
         return other.x <= this.x & other.y <= this.y;
     }
 
-    public Vector2d upperRight(Vector2d other) {
-        return new Vector2d(Math.max(x, other.x), Math.max(y, other.y));
-    }
-
-    public Vector2d lowerLeft(Vector2d other) {
-        return new Vector2d(Math.min(x, other.x), Math.min(y, other.y));
-    }
-
     public Vector2d add(Vector2d other) {
         return new Vector2d(this.x + other.x, this.y + other.y);
-    }
-
-    public Vector2d substract(Vector2d other) {
-        return new Vector2d(this.x - other.x, this.y - other.y);
     }
 
     public boolean equals(Object other) {
         if (other instanceof Vector2d vector) {
             return vector.x == this.x & vector.y == this.y;
         } else return false;
-    }
-
-    public Vector2d opposite() {
-        return new Vector2d(-this.x, -this.y);
     }
 
     @Override

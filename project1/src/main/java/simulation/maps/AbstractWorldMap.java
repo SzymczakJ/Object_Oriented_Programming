@@ -14,7 +14,7 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
     protected Map<Genotype, Integer> genotypes = new HashMap<>();
     protected int mapEra = 0;
     protected Random random = new Random();
-    public static int maxEnergy = 100;
+    public static int maxEnergy = 1000;
     protected int startingEnergy;
     protected int energyGivenByGrass;
     protected int moveEnergy;
@@ -28,7 +28,7 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
     public final Vector2d lowerLeftJungleCorner;
     public final Vector2d higherRightJungleCorner;
     protected AnimalTracker currentTracker = null;
-    //TODO TOWYJEBAC
+
     public Vector2d[] computeBounds() {
         return new Vector2d[] {lowerLeftSavannaCorner, higherRightSavannaCorner};
     }
@@ -209,12 +209,12 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
         int i = 0;
         Random random = new Random();
 
-        int x = random.nextInt((int) (mapWidth * jungleRatio + 2)) + lowerLeftJungleCorner.x;
-        int y = random.nextInt((int) (mapHeight * jungleRatio + 2)) + lowerLeftJungleCorner.y;
+        int x = random.nextInt((int) (mapWidth * jungleRatio + 1)) + lowerLeftJungleCorner.x;
+        int y = random.nextInt((int) (mapHeight * jungleRatio + 1)) + lowerLeftJungleCorner.y;
         Vector2d positionOfGrass = new Vector2d(x, y);
         while(i < toManyTimes && !createAndPlaceGrass(positionOfGrass)) {
-            x = random.nextInt((int) (mapWidth * jungleRatio + 2)) + lowerLeftJungleCorner.x;
-            y = random.nextInt((int) (mapHeight * jungleRatio + 2)) + lowerLeftJungleCorner.y;
+            x = random.nextInt((int) (mapWidth * jungleRatio + 1)) + lowerLeftJungleCorner.x;
+            y = random.nextInt((int) (mapHeight * jungleRatio + 1)) + lowerLeftJungleCorner.y;
             positionOfGrass = new Vector2d(x, y);
             i++;
         }
@@ -243,10 +243,10 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
             }
             case 1 -> {
                 x = random.nextInt(higherRightSavannaCorner.x - higherRightJungleCorner.x) + higherRightJungleCorner.x + 1;
-                y = random.nextInt(higherRightJungleCorner.y);
+                y = random.nextInt(higherRightJungleCorner.y + 1);
             }
             case 2 -> {
-                x = random.nextInt(higherRightSavannaCorner.x - lowerLeftJungleCorner.x) + lowerLeftJungleCorner.x + 1;
+                x = random.nextInt(higherRightSavannaCorner.x - lowerLeftJungleCorner.x + 1) + lowerLeftJungleCorner.x;
                 y = random.nextInt(higherRightSavannaCorner.y - higherRightJungleCorner.y) + higherRightJungleCorner.y + 1;
             }
             case 3 -> {
@@ -256,12 +256,6 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
             default -> throw new IllegalStateException("Unexpected value: " + areaToRandomFrom);
         };
         return new Vector2d(x, y);
-    }
-    //TODO TOWYJEBAC
-    public void printGrasses() {
-        grassTufts.forEach(
-                (key, value)
-                    -> System.out.println(key));
     }
 
     public List<Animal> getStrongestAnimalsAtPosition(Vector2d position) {

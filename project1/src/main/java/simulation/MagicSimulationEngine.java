@@ -9,31 +9,36 @@ public class MagicSimulationEngine implements Runnable, ISimulationEngine {
     private final App simulationObserver;
     private final int moveDelay;
     private int magicHelpCounter = 0;
+    private final int simulationId;
+    private boolean exit = false;
 
-    public MagicSimulationEngine(AbstractWorldMap map, App simulationObserver, int startingEnergy, int ammountOfAnimals, int moveDelay) {
+    public MagicSimulationEngine(AbstractWorldMap map, App simulationObserver, int startingEnergy, int ammountOfAnimals, int moveDelay, int simulationId) {
         this.map = map;
         this.simulationObserver = simulationObserver;
         this.moveDelay = moveDelay;
         map.initializeMapWithAnimals(ammountOfAnimals, startingEnergy);
+        this.simulationId = simulationId;
     }
 
 
     @Override
     public void run() {
         Platform.runLater(() -> {
-            simulationObserver.renderMap(map);
+            simulationObserver.renderGui(map, simulationId);
         });
         try {
             Thread.sleep(moveDelay);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        while (true) {
-            while (simulationObserver.getStopSimulation1()) { try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                System.out.println("zakończono działanie");
-            }}
+        while (!exit) {
+            while (simulationObserver.getStopSimulation(simulationId)) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    System.out.println("zakończono działanie");
+                }
+            }
             map.moveAllAnimals();
             map.deleteDeadAnimals();
             map.allAnimalsGrazeOnGrass();
@@ -45,7 +50,7 @@ public class MagicSimulationEngine implements Runnable, ISimulationEngine {
                 map.magicEvolutionHelper();
             }
             Platform.runLater(() -> {
-                simulationObserver.renderMap((AbstractWorldMap) map);
+                simulationObserver.renderGui(map, simulationId);
             });
             try {
                 Thread.sleep(moveDelay);
@@ -53,5 +58,9 @@ public class MagicSimulationEngine implements Runnable, ISimulationEngine {
                 System.out.println("zakończono działanie");
             }
         }
+    }
+
+    public void stop() {
+        exit = true;
     }
 }

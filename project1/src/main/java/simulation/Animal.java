@@ -177,9 +177,8 @@ public class Animal {
     }
 
     public String getEnergyColor() {
-        if (energy > map.getStartingEnergy()) {
-            return "B22222";
-        }
+        if (energy >= map.getStartingEnergy()) return "B22222";
+        else if (energy >= map.getStartingEnergy() / 2) return "FF6600";
         else return "FF1493";
     }
 
