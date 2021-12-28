@@ -141,8 +141,12 @@ public class Animal {
         this.energy -= energy;
     }
 
-    public boolean isAt(Vector2d position) {
-        return this.position.equals(position);
+    public boolean isTrackedByTracker(AnimalTracker animalTracker) {
+        return animalTracker == this.animalTracker;
+    }
+
+    public boolean isTrackerAnimalNull() {
+        return animalTracker == null;
     }
 
     public void positionChanged(Vector2d oldPosition) {

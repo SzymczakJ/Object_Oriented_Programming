@@ -60,56 +60,6 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
         }
     }
 
-    public void moveAllAnimals() {
-        mapEra += 1;
-        for (Animal animal: animalList) {
-            animal.moveRandomly();
-            animal.reduceEnergy(moveEnergy);
-        }
-    }
-
-    public void allAnimalsGrazeOnGrass() {
-        animals.forEach((position, animalListAtPosition) -> {
-            if (grassTufts.get(position) != null && !animalListAtPosition.isEmpty()) grazeOnGrass(position);
-        });
-    }
-
-    public void deleteDeadAnimals() {
-        List<Animal> animalsToDelete = new ArrayList<>();
-        List<Vector2d> positionsToDelete = new ArrayList<>();
-        animals.forEach((position, animalListAtPosition) -> {
-            for (Animal animal: animalListAtPosition) {
-                if (animal.getEnergy() <= 0) {
-                    animalsToDelete.add(animal);
-                    animalList.remove(animal);
-                    numberOfAnimals -= 1;
-                    deadAnimalList.add(animal);
-                    removeGenetypeFromGenotypes(animal.genotype);
-                    animal.setDeathEra(this.getMapEra());
-                    notifyTrackerOfDeath(animal);
-                    if (animalListAtPosition.isEmpty()) positionsToDelete.add(position);
-                }
-            }
-            for (Animal animal: animalsToDelete) {
-                animalListAtPosition.remove(animal);
-            }
-            animalsToDelete.clear();
-        });
-        for (Vector2d positions: positionsToDelete) {
-            animals.remove(positions);
-        }
-    }
-
-    public void allAnimalsMakeLove() {
-        animals.forEach((position, animalList) -> {
-            if (animalList.size() > 1) makeLove(position);
-        });
-    }
-
-    public boolean isInBounds(Vector2d newPosition) {
-        return newPosition.follows(lowerLeftSavannaCorner) && newPosition.precedes(higherRightSavannaCorner);
-    }
-
     public void place(Animal animal) throws IllegalArgumentException {
         if (this.isInBounds(animal.getPosition())) {
             putAnimalInPositionList(animal);
@@ -120,41 +70,8 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
         else throw new IllegalArgumentException();
     }
 
-    public void putGenotypeIntoGenotypes(Genotype genotype) {
-        if (genotypes.get(genotype) == null) {
-            genotypes.put(genotype, 1);
-        }
-        else {
-            genotypes.put(genotype, genotypes.get(genotype) + 1);
-        }
-    }
-
-    public void removeGenetypeFromGenotypes(Genotype genotype) {
-        if (genotypes.get(genotype).intValue() == 1) {
-            genotypes.remove(genotype);
-        }
-        else {
-            genotypes.put(genotype, genotypes.get(genotype) - 1);
-        }
-    }
-
-    public Object getStrongestAnimalAtPosition(Vector2d position) {
-        if (animals.get(position) != null) {
-            List<Animal> animalListAtPosition = animals.get(position);
-            if (animalListAtPosition.size() > 0) {
-                int highestEnergy = 0;
-                Animal strongestAnimal = animalListAtPosition.get(0);
-                for (Animal animal: animalListAtPosition) {
-                    if (animal.getEnergy() > highestEnergy) {
-                        strongestAnimal = animal;
-                        highestEnergy = animal.getEnergy();
-                    }
-                }
-                return strongestAnimal;
-            }
-            else return null;
-        }
-        else return null;
+    public boolean isInBounds(Vector2d newPosition) {
+        return newPosition.follows(lowerLeftSavannaCorner) && newPosition.precedes(higherRightSavannaCorner);
     }
 
     public Object objectAt(Vector2d position) {
@@ -284,6 +201,39 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
         return result;
     }
 
+    public Object getStrongestAnimalAtPosition(Vector2d position) {
+        if (animals.get(position) != null) {
+            List<Animal> animalListAtPosition = animals.get(position);
+            if (animalListAtPosition.size() > 0) {
+                int highestEnergy = 0;
+                Animal strongestAnimal = animalListAtPosition.get(0);
+                for (Animal animal: animalListAtPosition) {
+                    if (animal.getEnergy() > highestEnergy) {
+                        strongestAnimal = animal;
+                        highestEnergy = animal.getEnergy();
+                    }
+                }
+                return strongestAnimal;
+            }
+            else return null;
+        }
+        else return null;
+    }
+
+    public void moveAllAnimals() {
+        mapEra += 1;
+        for (Animal animal: animalList) {
+            animal.moveRandomly();
+            animal.reduceEnergy(moveEnergy);
+        }
+    }
+
+    public void allAnimalsGrazeOnGrass() {
+        animals.forEach((position, animalListAtPosition) -> {
+            if (grassTufts.get(position) != null && !animalListAtPosition.isEmpty()) grazeOnGrass(position);
+        });
+    }
+
     public void grazeOnGrass(Vector2d position) {
         List<Animal> strongestAnimals = getStrongestAnimalsAtPosition(position);
         int energyBoost = (int) (energyGivenByGrass / strongestAnimals.size());
@@ -291,6 +241,38 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
             animal.increaseEnergy(energyBoost);
         }
         grassTufts.remove(position);
+    }
+
+    public void deleteDeadAnimals() {
+        List<Animal> animalsToDelete = new ArrayList<>();
+        List<Vector2d> positionsToDelete = new ArrayList<>();
+        animals.forEach((position, animalListAtPosition) -> {
+            for (Animal animal: animalListAtPosition) {
+                if (animal.getEnergy() <= 0) {
+                    animalsToDelete.add(animal);
+                    animalList.remove(animal);
+                    numberOfAnimals -= 1;
+                    deadAnimalList.add(animal);
+                    removeGenetypeFromGenotypes(animal.genotype);
+                    animal.setDeathEra(this.getMapEra());
+                    notifyTrackerOfDeath(animal);
+                    if (animalListAtPosition.isEmpty()) positionsToDelete.add(position);
+                }
+            }
+            for (Animal animal: animalsToDelete) {
+                animalListAtPosition.remove(animal);
+            }
+            animalsToDelete.clear();
+        });
+        for (Vector2d positions: positionsToDelete) {
+            animals.remove(positions);
+        }
+    }
+
+    public void allAnimalsMakeLove() {
+        animals.forEach((position, animalList) -> {
+            if (animalList.size() > 1) makeLove(position);
+        });
     }
 
     public void makeLove(Vector2d position) {
@@ -301,6 +283,24 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
         Animal animal1 = strongestAnimals.get(0);
         Animal animal2 = strongestAnimals.get(1);
         animal1.fertilization(animal2, (int) (startingEnergy / 2));
+    }
+
+    public void putGenotypeIntoGenotypes(Genotype genotype) {
+        if (genotypes.get(genotype) == null) {
+            genotypes.put(genotype, 1);
+        }
+        else {
+            genotypes.put(genotype, genotypes.get(genotype) + 1);
+        }
+    }
+
+    public void removeGenetypeFromGenotypes(Genotype genotype) {
+        if (genotypes.get(genotype).intValue() == 1) {
+            genotypes.remove(genotype);
+        }
+        else {
+            genotypes.put(genotype, genotypes.get(genotype) - 1);
+        }
     }
 
     public int getNumberOfAnimals() {
@@ -333,6 +333,10 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
         return (double) sum / (double) animalList.size();
     }
 
+    public AnimalTracker getAnimalTracker() {
+        return currentTracker;
+    }
+
     public double getAverageLifeSpan() {
         if (deadAnimalList.isEmpty()) return 0;
         int sum = 0;
@@ -357,41 +361,36 @@ public abstract class AbstractWorldMap implements IPositionChangeObserver {
         return dominantGenotypes;
     }
 
+    public int getStartingEnergy() {
+        return startingEnergy;
+    }
+
     public void setCurrentTracker(AnimalTracker animalTracker) {
         currentTracker = animalTracker;
     }
 
-    public AnimalTracker getAnimalTracker() {
-        return currentTracker;
-    }
-
     public boolean notifyTrackerOfBirth(Animal animal1, Animal animal2) {
         boolean trackedAnimalPresent = false;
-        if (animal1.getAnimalTracker() != null && animal1.getAnimalTracker().getAnimal() == animal1) trackedAnimalPresent = true;
-        else if (animal2.getAnimalTracker() != null && animal2.getAnimalTracker().getAnimal() == animal2) trackedAnimalPresent = true;
+        if (currentTracker != null && currentTracker.animalIsTracked(animal1)) trackedAnimalPresent = true;
+        else if (currentTracker != null && currentTracker.animalIsTracked(animal2)) trackedAnimalPresent = true;
         if (trackedAnimalPresent) {
             currentTracker.increaseChildrenAndDescendantCount();
             return true;
         }
-
-        if (currentTracker != null && animal1.getAnimalTracker() == currentTracker) {
+        if (currentTracker != null && animal1.isTrackedByTracker(currentTracker)) {
             currentTracker.increaseDescendantCount();
             return true;
         }
-        else if (currentTracker != null && animal2.getAnimalTracker() == currentTracker) {
+        else if (currentTracker != null && animal2.isTrackedByTracker(currentTracker)) {
             currentTracker.increaseDescendantCount();
             return true;
         } else return false;
     }
 
     public void notifyTrackerOfDeath(Animal animal) {
-        if (animal.getAnimalTracker() != null) {
+        if (!animal.isTrackerAnimalNull()) {
             currentTracker.setDeathEra(animal);
         }
-    }
-
-    public int getStartingEnergy() {
-        return startingEnergy;
     }
 
     public void magicEvolutionHelper() {

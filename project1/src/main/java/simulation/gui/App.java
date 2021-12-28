@@ -3,6 +3,7 @@ package simulation.gui;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -12,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import simulation.*;
@@ -46,16 +48,24 @@ public class App extends Application {
     public void start(Stage primaryStage) throws Exception {
         createText("Map properties");
         TextField mapHeightTextField = createHBoxWithTextField("Map height: ");
+        mapHeightTextField.setText("30");
         TextField mapWidthTextField = createHBoxWithTextField("Map width: ");
+        mapWidthTextField.setText("30");
         TextField jungleRatio = createHBoxWithTextField("Jungle ratio: ");
+        jungleRatio.setText("0.125");
         createText("Energy properties");
         TextField grassEnergyBoostTextField = createHBoxWithTextField("Grass energy boost: ");
+        grassEnergyBoostTextField.setText("100");
         TextField animalStartingEnergyTextField = createHBoxWithTextField("Animal starting energy: ");
+        animalStartingEnergyTextField.setText("200");
         TextField dailyEnergyCostTextField = createHBoxWithTextField("Daily energy cost: ");
+        dailyEnergyCostTextField.setText("2");
         createText("Spawning properties");
         TextField animalsSpawningAtTheStart = createHBoxWithTextField("Animals spawning at the start");
+        animalsSpawningAtTheStart.setText("20");
         createText("Others");
         TextField realRefreshTime = createHBoxWithTextField("Real refresh time(ms)");
+        realRefreshTime.setText("100");
         createText("If simulation usues magic rule");
         Button boundedMapButton = new Button("Bounded map");
         boundedMapButton.setOnAction(event -> {
@@ -111,6 +121,49 @@ public class App extends Application {
         for (Node elementOfVBox: listOfVBoxElements) {
             vBox.getChildren().add(elementOfVBox);
         }
+    }
+
+    public void showSimulation(int height, int width, double jungleRatio, int energyGivenByGrass, int stratingEnergy, int moveEnergy, int ammountOfAnimals, int moveDelay) {
+        BoundedMap boundedMap = new BoundedMap(height, width, jungleRatio, energyGivenByGrass, stratingEnergy, moveEnergy);
+        FoldedMap foldedMap = new FoldedMap(height, width, jungleRatio, energyGivenByGrass, stratingEnergy, moveEnergy);
+        ISimulationEngine engine1;
+        ISimulationEngine engine2;
+        if (boundedMapIsMagical) engine1 = new MagicSimulationEngine(boundedMap, this, stratingEnergy, ammountOfAnimals, moveDelay, 0);
+        else engine1 = new SimulationEngine(boundedMap, this, stratingEnergy, ammountOfAnimals, moveDelay, 0);
+        if (foldedMapIsMagical) engine2 = new MagicSimulationEngine(foldedMap, this, stratingEnergy, ammountOfAnimals, moveDelay, 1);
+        else engine2 = new SimulationEngine(foldedMap, this, stratingEnergy, ammountOfAnimals, moveDelay, 1);
+
+
+        Thread engineThread1 = new Thread((Runnable) engine1);
+        engineThread1.start();
+        Thread engineThread2 = new Thread((Runnable) engine2);
+        engineThread2.start();
+
+        VBox generalSimulationBox1 = new VBox();
+        VBox generalSimulationBox2 = new VBox();
+        setUpEverythingExceptCharts(generalSimulationBox1, 0, boundedMap);
+        setUpEverythingExceptCharts(generalSimulationBox2, 1, foldedMap);
+        setUpCharts(generalSimulationBox1, generalSimulationBox2);
+        HBox generalBox = new HBox(generalSimulationBox1, generalSimulationBox2);
+        Scene simulationScene = new Scene(generalBox, 1000, 1000);
+        Stage simulationStage = new Stage();
+        simulationStage.setTitle("Simulation");
+        simulationStage.setScene(simulationScene);
+        Screen screen = Screen.getPrimary();
+        Rectangle2D bounds = screen.getVisualBounds();
+
+        simulationStage.setX(bounds.getMinX());
+        simulationStage.setY(bounds.getMinY());
+        simulationStage.setWidth(bounds.getWidth());
+        simulationStage.setHeight(bounds.getHeight());
+        simulationStage.show();
+        simulationStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                engine1.stop();
+                engine2.stop();
+            }
+        });
     }
 
     public void renderGui(AbstractWorldMap map, int simulationId) {
@@ -169,41 +222,7 @@ public class App extends Application {
         return button;
     }
 
-    public void showSimulation(int height, int width, double jungleRatio, int energyGivenByGrass, int stratingEnergy, int moveEnergy, int ammountOfAnimals, int moveDelay) {
-        BoundedMap boundedMap = new BoundedMap(height, width, jungleRatio, energyGivenByGrass, stratingEnergy, moveEnergy);
-        FoldedMap foldedMap = new FoldedMap(height, width, jungleRatio, energyGivenByGrass, stratingEnergy, moveEnergy);
-        ISimulationEngine engine1;
-        ISimulationEngine engine2;
-        if (boundedMapIsMagical) engine1 = new MagicSimulationEngine(boundedMap, this, stratingEnergy, ammountOfAnimals, moveDelay, 0);
-        else engine1 = new SimulationEngine(boundedMap, this, stratingEnergy, ammountOfAnimals, moveDelay, 0);
-        if (foldedMapIsMagical) engine2 = new MagicSimulationEngine(foldedMap, this, stratingEnergy, ammountOfAnimals, moveDelay, 1);
-        else engine2 = new SimulationEngine(foldedMap, this, stratingEnergy, ammountOfAnimals, moveDelay, 1);
 
-
-        Thread engineThread1 = new Thread((Runnable) engine1);
-        engineThread1.start();
-        Thread engineThread2 = new Thread((Runnable) engine2);
-        engineThread2.start();
-
-        VBox generalSimulationBox1 = new VBox();
-        VBox generalSimulationBox2 = new VBox();
-        setUpEverythingExceptCharts(generalSimulationBox1, 0, boundedMap);
-        setUpEverythingExceptCharts(generalSimulationBox2, 1, foldedMap);
-        setUpCharts(generalSimulationBox1, generalSimulationBox2);
-        HBox generalBox = new HBox(generalSimulationBox1, generalSimulationBox2);
-        Scene simulationScene = new Scene(generalBox, 1000, 1000);
-        Stage simulationStage = new Stage();
-        simulationStage.setTitle("Simulation");
-        simulationStage.setScene(simulationScene);
-        simulationStage.show();
-        simulationStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent event) {
-                engine1.stop();
-                engine2.stop();
-            }
-        });
-    }
 
     public void setUpCharts(VBox vBox1, VBox vBox2) {
         wipeChart();

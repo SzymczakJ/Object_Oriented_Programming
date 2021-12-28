@@ -37,4 +37,8 @@ public class AnimalTracker {
     }
 
     public int getDeathEra() {return eraOfDeath;}
+
+    public boolean animalIsTracked(Animal animal) {
+        return this.animal == animal;
+    }
 }
