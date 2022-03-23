@@ -1,1 +1,1 @@
-# Object_Oriented_Programming
+Project completed during my object oriented programming course at UST AGH.
